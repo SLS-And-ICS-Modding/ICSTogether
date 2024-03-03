@@ -8,6 +8,8 @@ Currently synced:<br/>
 Buying Rooms(including kitchen) and floors - 🟩
 Buying workers - 🟦
 Buying from Zamazor 🟨 - everything syncs except posters(won't implement it, because it doesn't generate any income)
+Door sync - 🟦
+Cafe Open/Close sync - 🟦 
 ```
 https://github.com/SLS-And-ICS-Modding/ICSTogether/assets/65111609/e977adb7-228d-483e-8743-6b702c125dfe
 
