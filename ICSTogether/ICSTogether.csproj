@@ -51,6 +51,7 @@
     <Reference Include="UnityEngine">
       <HintPath>..\..\WindowFix\WindowFix\dlls\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\WindowFix\WindowFix\dlls\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
@@ -69,6 +70,7 @@
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>..\..\WindowFix\WindowFix\dlls\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\WindowFix\WindowFix\dlls\UnityEngine.UI.dll</HintPath>
     </Reference>
@@ -77,7 +79,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="HarmonyPatches\Misc.cs" />
+    <Compile Include="HarmonyPatches\Workers.cs" />
+    <Compile Include="Helpers\ParseItemId.cs" />
+    <Compile Include="Main.cs" />
+    <Compile Include="HarmonyPatches\Rooms.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
