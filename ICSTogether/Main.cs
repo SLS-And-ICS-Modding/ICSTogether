@@ -31,6 +31,7 @@ namespace ICSTogether
         public static bool IsDisconnected = false;
         public static int receivedpackets = 0;
         public static string lastpacket = "";
+        public static float player2money = 0;
         public static GameObject player;
         SaveManager gb = GameObject.FindObjectOfType<SaveManager>();
 
@@ -51,9 +52,9 @@ namespace ICSTogether
             {
                 case "BuyKitchenLock":
                     {
-                        foreach(var loc in dg)
+                        foreach (var loc in dg)
                         {
-                            if(loc.transform.position == lockkitchenPosition)
+                            if (loc.transform.position == lockkitchenPosition)
                             {
                                 GameObject.Destroy(loc);
                             }
@@ -199,13 +200,13 @@ namespace ICSTogether
                         float x = float.Parse(sr.ReadLine());
                         float y = float.Parse(sr.ReadLine()) + 0.8f;
                         float z = float.Parse(sr.ReadLine());
-                        
-                        if(player == null)
+
+                        if (player == null)
                         {
                             player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                         }
                         player.transform.position = new Vector3(x, y, z);
-                        if(player.transform.position != new Vector3(x,y,z))
+                        if (player.transform.position != new Vector3(x, y, z))
                         {
                             GameObject.Destroy(player);
                             player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
@@ -232,7 +233,12 @@ namespace ICSTogether
                         GameObject backup = wp.gameObject;
                         GameObject.Destroy(wp);
                         var gb = GameObject.Instantiate(backup);
-                        
+
+                        break;
+                    }
+                case "MONEY_UPDATE":
+                    {
+                        player2money = float.Parse(sr.ReadLine());
                         break;
                     }
                 default:
@@ -267,7 +273,18 @@ namespace ICSTogether
 
                 }
             }
-            
+            if(Input.GetKeyDown(KeyCode.Mouse5))
+            {
+                GameObject.Destroy(player);
+                player = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            }
+            if(oldmoney != PlayerPrefs.GetFloat("money"))
+            {
+                sw.WriteLine("MONEY_UPDATE");
+                sw.WriteLine(PlayerPrefs.GetFloat("money"));
+                sw.Flush();
+                oldmoney = PlayerPrefs.GetFloat("money");
+            }
             if (IsClient && tcpClient.Connected && ns.DataAvailable)
             {
                 
@@ -286,7 +303,7 @@ namespace ICSTogether
             style.normal.textColor = Color.red;
             style.fontStyle = FontStyle.Bold;
             style.normal.background = ICSTogether.Helpers.Texture.MakeTex(2, 2, Color.black);
-            GUILayout.Label("ICSTogether - v0.1.1 pre-alpha",style);
+            GUILayout.Label("ICSTogether - v0.1.2 pre-alpha",style);
             
             if (!IsHost && !IsClient)
             {
@@ -310,7 +327,11 @@ namespace ICSTogether
             }
             GUILayout.Label($"received {receivedpackets} packets in total", style);
             GUILayout.Label($"last {lastpacket} packet", style);
-            
+            if(IsHost||IsClient)
+            {
+                GUILayout.Label($"Your money: {PlayerPrefs.GetFloat("money")}\nPlayer's 2 money: {player2money}", style);
+                GUILayout.Label("Click MOUSE5 if your friend isn't moving on your side", style);
+            }
         }
         private void TcpDaemon(IAsyncResult result)
         {
