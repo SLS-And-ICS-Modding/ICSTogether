@@ -31,6 +31,8 @@ namespace ICSTogether
         public static TcpListener listener;
         public static bool IsDisconnected = false;
         public static int receivedpackets = 0;
+        public static string lastpacket = "";
+        public static GameObject player;
         SaveManager gb = GameObject.FindObjectOfType<SaveManager>();
 
         GameObject[] dg = GameObject.FindObjectsOfType<GameObject>();
@@ -41,9 +43,11 @@ namespace ICSTogether
         Vector3 lock4Position = new Vector3(45.0f, 0.9f, 140.9f);
         Vector3 lock5Position = new Vector3(45.7f, 0.9f, 152.8f);
         Vector3 lock6Position = new Vector3(52.4f, 0.9f, 150.7f);
+        static Vector3 oldpos = new Vector3(0,0,0);
         private void HandlePacket(string packet)
         {
             receivedpackets++;
+            lastpacket = packet;
             switch (packet)
             {
                 case "BuyKitchenLock":
@@ -145,6 +149,62 @@ namespace ICSTogether
 
                         break;
                     }
+                case "OpenCafe":
+                    {
+                        DoorSign ds = GameObject.FindObjectOfType<DoorSign>();
+                        ds.OpenCafe();
+                        break;
+                    }
+                case "CloseCafe":
+                    {
+                        DoorSign ds = GameObject.FindObjectOfType<DoorSign>();
+                        ds.CloseCafe();
+                        break;
+                    }
+                case "OpenDoor":
+                    {
+                        string name = sr.ReadLine();
+                        
+                        vars.readdata = true;
+                        GameObject door = GameObject.FindGameObjectsWithTag("door").Where(x => x.name == name).First();
+                        MelonLogger.Msg("opened door at" + door.transform.position.ToString());
+                        if (door.GetComponent<Animator>().GetBool("open"))
+                        {
+                            door.GetComponent<Animator>().SetBool("open", false);
+                            if (door.GetComponent<ItemName>().itemID == "wDoor")
+                            {
+                                AudioManager.Instance.PlaySound(AudioManager.Instance.w_doorClose, 0.35f, 0.55f);
+                            }
+                            else
+                            {
+                                AudioManager.Instance.PlaySound(AudioManager.Instance.doorClose, 0.15f, 0.75f);
+                            }
+                        }
+                        else
+                        {
+                            door.GetComponent<Animator>().SetBool("open", true);
+                            if (door.GetComponent<ItemName>().itemID == "wDoor")
+                            {
+                                AudioManager.Instance.PlaySound(AudioManager.Instance.w_doorOpen, 0.45f, 0f);
+                            }
+                            else
+                            {
+                                AudioManager.Instance.PlaySound(AudioManager.Instance.doorOpen, 0.2f, 0f);
+                            }
+                        }
+                        vars.readdata = false;
+                        break;
+                    }
+                case "UpdateMovement":
+                    {
+                        float x = float.Parse(sr.ReadLine());
+                        float y = float.Parse(sr.ReadLine()) + 0.8f;
+                        float z = float.Parse(sr.ReadLine());
+                        GameObject.Destroy(player);
+                        player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                        player.transform.position = new Vector3(x, y, z);
+                        break;
+                    }
                 default:
                     {
                         if (packet.StartsWith("Buy:"))
@@ -155,15 +215,28 @@ namespace ICSTogether
                             GameObject shit = ParseItemId.Spaghetti(data[2]);
                             GameObject.Instantiate(shit, pos, Quaternion.identity);
                         }
-                        
+                       
                         break;
                     }
             }
         }
+        
         public override void OnUpdate()
         {
-            if(IsClient && tcpClient.Connected && ns.DataAvailable)
+            Vector3 pos = GameObject.FindObjectOfType<PlayerRaycast>().transform.position;
+            if (Vector3.Distance(oldpos,pos)>= 1f)
             {
+                sw.WriteLine("UpdateMovement");
+                sw.WriteLine(pos.x);
+                sw.WriteLine(pos.y);
+                sw.WriteLine(pos.z);
+                sw.Flush();
+                oldpos = pos;
+                
+            }
+            if (IsClient && tcpClient.Connected && ns.DataAvailable)
+            {
+                
                 string receivedData = sr.ReadLine();
                 
                 if (!string.IsNullOrEmpty(receivedData))
@@ -178,8 +251,13 @@ namespace ICSTogether
             GUIStyle style = new GUIStyle();
             style.normal.textColor = Color.yellow;
             style.fontStyle = FontStyle.Bold;
-            GUILayout.Label("ICSTogether - v0.2 pre-alpha",style);
-            if(!IsHost && !IsClient && !IsInMenu)
+            GUILayout.Label("ICSTogether - v0.1.0 pre-alpha",style);
+            /*Vector3 pos = GameObject.FindObjectOfType<PlayerRaycast>().transform.position;
+            if(player != null)
+            {
+                GUILayout.Label($"{pos}\n{oldpos}\n{player.transform.position}");
+            }*/
+            if (!IsHost && !IsClient)
             {
                 ip = GUILayout.TextField(ip);
                 if(GUILayout.Button("Join", style))
@@ -199,8 +277,9 @@ namespace ICSTogether
                     listener.BeginAcceptTcpClient(new AsyncCallback(TcpDaemon), null);
                 }
             }
-            GUILayout.Label($"received {receivedpackets} in total", style);
-            if(IsHost && !IsDisconnected)
+            GUILayout.Label($"received {receivedpackets} packets in total", style);
+            GUILayout.Label($"last {lastpacket} packet", style);
+            if (IsHost && !IsDisconnected)
             {
                 if(tcpClient.Connected)
                 {
@@ -211,9 +290,11 @@ namespace ICSTogether
         private void TcpDaemon(IAsyncResult result)
         {
             tcpClient = listener.EndAcceptTcpClient(result);
+            player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             ns = tcpClient.GetStream();
             sw = new StreamWriter(ns);
             sr = new StreamReader(ns);
+            
             new Thread(() => {
                 while(true)
                 {
