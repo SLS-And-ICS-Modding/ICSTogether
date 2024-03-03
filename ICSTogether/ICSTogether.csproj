@@ -88,6 +88,7 @@
     <Compile Include="HarmonyPatches\Misc.cs" />
     <Compile Include="HarmonyPatches\Workers.cs" />
     <Compile Include="Helpers\ParseItemId.cs" />
+    <Compile Include="Helpers\Texture.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="HarmonyPatches\Rooms.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

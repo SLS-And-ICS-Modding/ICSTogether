@@ -22,7 +22,6 @@ namespace ICSTogether
     {
         static bool IsHost = false;
         static bool IsClient = false;
-        static bool IsInMenu => GameObject.FindObjectsOfType<PlayerRaycast>().Length > 0;
         public static float oldmoney = 0;
         public static NetworkStream ns;
         public static TcpClient tcpClient;
@@ -161,7 +160,7 @@ namespace ICSTogether
                         ds.CloseCafe();
                         break;
                     }
-                case "OpenDoor":
+                /*case "OpenDoor":
                     {
                         string name = sr.ReadLine();
                         
@@ -194,15 +193,46 @@ namespace ICSTogether
                         }
                         vars.readdata = false;
                         break;
-                    }
+                    }*/
                 case "UpdateMovement":
                     {
                         float x = float.Parse(sr.ReadLine());
                         float y = float.Parse(sr.ReadLine()) + 0.8f;
                         float z = float.Parse(sr.ReadLine());
-                        GameObject.Destroy(player);
-                        player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                        
+                        if(player == null)
+                        {
+                            player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                        }
                         player.transform.position = new Vector3(x, y, z);
+                        if(player.transform.position != new Vector3(x,y,z))
+                        {
+                            GameObject.Destroy(player);
+                            player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                            player.transform.position = new Vector3(x, y, z);
+                        }
+                        break;
+                    }
+                case "BUTTON_CHEFBUY":
+                    {
+                        PlayerPrefs.SetInt("buychef", 50);
+                        AudioManager.Instance.PlaySound(AudioManager.Instance.cashRegister, 0.3f, 0f);
+                        var wp = GameObject.FindObjectOfType<WorkersPanel>();
+                        GameObject backup = wp.gameObject;
+                        GameObject.Destroy(wp);
+                        var gb = GameObject.Instantiate(backup);
+                        break;
+                    }
+                case "BUTTON_BODYGUARDBUY":
+                    {
+
+                        PlayerPrefs.SetInt("buybodyguard", 50);
+                        AudioManager.Instance.PlaySound(AudioManager.Instance.cashRegister, 0.3f, 0f);
+                        var wp = GameObject.FindObjectOfType<WorkersPanel>();
+                        GameObject backup = wp.gameObject;
+                        GameObject.Destroy(wp);
+                        var gb = GameObject.Instantiate(backup);
+                        
                         break;
                     }
                 default:
@@ -223,17 +253,21 @@ namespace ICSTogether
         
         public override void OnUpdate()
         {
-            Vector3 pos = GameObject.FindObjectOfType<PlayerRaycast>().transform.position;
-            if (Vector3.Distance(oldpos,pos)>= 1f)
+            if(GameObject.FindObjectOfType<PlayerRaycast>() != null)
             {
-                sw.WriteLine("UpdateMovement");
-                sw.WriteLine(pos.x);
-                sw.WriteLine(pos.y);
-                sw.WriteLine(pos.z);
-                sw.Flush();
-                oldpos = pos;
-                
+                Vector3 pos = GameObject.FindObjectOfType<PlayerRaycast>().transform.position;
+                if (Vector3.Distance(oldpos, pos) >= 1f)
+                {
+                    sw.WriteLine("UpdateMovement");
+                    sw.WriteLine(pos.x);
+                    sw.WriteLine(pos.y);
+                    sw.WriteLine(pos.z);
+                    sw.Flush();
+                    oldpos = pos;
+
+                }
             }
+            
             if (IsClient && tcpClient.Connected && ns.DataAvailable)
             {
                 
@@ -249,17 +283,14 @@ namespace ICSTogether
         public override void OnGUI()
         {
             GUIStyle style = new GUIStyle();
-            style.normal.textColor = Color.yellow;
+            style.normal.textColor = Color.red;
             style.fontStyle = FontStyle.Bold;
+            style.normal.background = ICSTogether.Helpers.Texture.MakeTex(2, 2, Color.black);
             GUILayout.Label("ICSTogether - v0.1.0 pre-alpha",style);
-            /*Vector3 pos = GameObject.FindObjectOfType<PlayerRaycast>().transform.position;
-            if(player != null)
-            {
-                GUILayout.Label($"{pos}\n{oldpos}\n{player.transform.position}");
-            }*/
+            
             if (!IsHost && !IsClient)
             {
-                ip = GUILayout.TextField(ip);
+                ip = GUILayout.TextField(ip, style);
                 if(GUILayout.Button("Join", style))
                 {
                     tcpClient = new TcpClient(ip,4200);
@@ -279,13 +310,7 @@ namespace ICSTogether
             }
             GUILayout.Label($"received {receivedpackets} packets in total", style);
             GUILayout.Label($"last {lastpacket} packet", style);
-            if (IsHost && !IsDisconnected)
-            {
-                if(tcpClient.Connected)
-                {
-                    GUILayout.Label("2nd client is connected", style);
-                }
-            }
+            
         }
         private void TcpDaemon(IAsyncResult result)
         {
