@@ -3,13 +3,15 @@ Dislaimer: since server is using sockets, host needs to have unlocked port 4200(
 Currently synced:<br/>
 🟩 - Fully synced<br/>
 🟦 - Not synced, but it is currently worked on/planned<br/>
+🟧 - synced, but unstable
 🟨 - partially synced<br/>
 ```
 Buying Rooms(including kitchen) and floors - 🟩
 Buying workers - 🟦
 Buying from Zamazor 🟨 - everything syncs except posters(won't implement it, because it doesn't generate any income)
 Door sync - 🟦
-Cafe Open/Close sync - 🟦 
+Cafe Open/Close sync - 🟩
+Player movement - 🟧(random crashes occur very often)
 ```
 https://github.com/SLS-And-ICS-Modding/ICSTogether/assets/65111609/e977adb7-228d-483e-8743-6b702c125dfe
 
