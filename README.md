@@ -3,7 +3,7 @@ Dislaimer: since server is using sockets, host needs to have unlocked port 4200(
 Currently synced:<br/>
 🟩 - Fully synced<br/>
 🟦 - Not synced, but it is currently worked on/planned<br/>
-🟧 - synced, but unstable
+🟧 - synced, but unstable<br/>
 🟨 - partially synced<br/>
 ```
 Buying Rooms(including kitchen) and floors - 🟩
