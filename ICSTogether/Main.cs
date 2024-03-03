@@ -286,7 +286,7 @@ namespace ICSTogether
             style.normal.textColor = Color.red;
             style.fontStyle = FontStyle.Bold;
             style.normal.background = ICSTogether.Helpers.Texture.MakeTex(2, 2, Color.black);
-            GUILayout.Label("ICSTogether - v0.1.0 pre-alpha",style);
+            GUILayout.Label("ICSTogether - v0.1.1 pre-alpha",style);
             
             if (!IsHost && !IsClient)
             {
