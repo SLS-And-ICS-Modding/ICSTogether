@@ -44,6 +44,8 @@ namespace ICSTogether
         Vector3 lock5Position = new Vector3(45.7f, 0.9f, 152.8f);
         Vector3 lock6Position = new Vector3(52.4f, 0.9f, 150.7f);
         static Vector3 oldpos = new Vector3(0,0,0);
+        static Vector3 lastsentpos = new Vector3(0, 0, 0);
+        static int calls = 0;
         private void HandlePacket(string packet)
         {
             receivedpackets++;
@@ -200,18 +202,22 @@ namespace ICSTogether
                         float x = float.Parse(sr.ReadLine());
                         float y = float.Parse(sr.ReadLine()) + 0.8f;
                         float z = float.Parse(sr.ReadLine());
-
+                        if(calls >= 25)
+                        {
+                            GameObject.Destroy(player.gameObject);
+                            player = null;
+                            calls = 0;
+                        }
                         if (player == null)
                         {
                             player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                         }
-                        player.transform.position = new Vector3(x, y, z);
-                        if (player.transform.position != new Vector3(x, y, z))
-                        {
-                            GameObject.Destroy(player);
-                            player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                            player.transform.position = new Vector3(x, y, z);
-                        }
+                        lastsentpos = new Vector3(x, y, z);
+                        player.transform.position = lastsentpos;
+                        MelonLogger.Msg("player spawned at " + lastsentpos);
+                        MelonLogger.Msg("current local pos " + player.transform.localPosition);
+                        MelonLogger.Msg("current pos " + player.transform.position);
+                        calls++;
                         break;
                     }
                 case "BUTTON_CHEFBUY":
@@ -275,8 +281,9 @@ namespace ICSTogether
             }
             if(Input.GetKeyDown(KeyCode.Mouse5))
             {
-                GameObject.Destroy(player);
-                player = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                player = GameObject.FindObjectsOfType<GameObject>().Where(m => m.name.Contains("Capsule")).First(); // refresh pointer i guess???
+                player.transform.position = new Vector3(0,0,0);
+                MelonLogger.Msg("repainted player at"+player.transform.position);
             }
             if(oldmoney != PlayerPrefs.GetFloat("money"))
             {
@@ -303,7 +310,7 @@ namespace ICSTogether
             style.normal.textColor = Color.red;
             style.fontStyle = FontStyle.Bold;
             style.normal.background = ICSTogether.Helpers.Texture.MakeTex(2, 2, Color.black);
-            GUILayout.Label("ICSTogether - v0.1.2 pre-alpha",style);
+            GUILayout.Label("ICSTogether - v0.1.4 pre-alpha",style);
             
             if (!IsHost && !IsClient)
             {
@@ -331,6 +338,7 @@ namespace ICSTogether
             {
                 GUILayout.Label($"Your money: {PlayerPrefs.GetFloat("money")}\nPlayer's 2 money: {player2money}", style);
                 GUILayout.Label("Click MOUSE5 if your friend isn't moving on your side", style);
+                GUILayout.Label("Last sent pos" + lastsentpos);
             }
         }
         private void TcpDaemon(IAsyncResult result)
