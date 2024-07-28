@@ -1,5 +1,5 @@
 # Internet Cafe Simulator Multiplayer Mod
-Dislaimer: since server is using sockets, host needs to have unlocked port 4200(tcp) or you both need to use program such as Hamachi/RadminVPN<br/>
+Disclaimer: since server is using sockets, host needs to have unlocked port 4200(tcp) or you both need to use program such as Hamachi/RadminVPN<br/>
 Currently synced:<br/>
 🟩 - Fully synced<br/>
 🟦 - Not synced, but it is currently worked on/planned<br/>
